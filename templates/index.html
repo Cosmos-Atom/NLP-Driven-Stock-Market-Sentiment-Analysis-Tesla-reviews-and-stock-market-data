@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesla Article</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .switch {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+        }
+
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Reviews section */
+        .reviews-container {
+            margin-top: 50px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .review-card {
+            background-color: #1c1c1c;
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .review-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .review-card h5 {
+            color: #4CAF50;
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+        }
+
+        .review-card p {
+            color: #ccc;
+            font-size: 1rem;
+        }
+
+        .review-card .author {
+            font-weight: bold;
+            margin-top: 15px;
+            color: #fff;
+        }
+
+        .review-card .rating {
+            font-size: 1.1rem;
+            color: #FFD700;
+        }
+
+        /* Review Form */
+        .form-container {
+            margin-top: 50px;
+            background-color: #1c1c1c;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .form-container input, .form-container textarea {
+            margin-bottom: 15px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+        }
+
+        .form-container button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 80%;
+        }
+
+        .form-container button:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.9rem;
+        }
+
+        .input-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .input-container input {
+                width: 75%;  /* Adjusted width */
+                padding: 10px;
+                border-radius: 5px;
+                border: 1px solid #444;
+                background-color: #333;
+                color: white;
+            }
+
+            .otp-button {
+                width: 20%;  /* Adjusted width */
+                padding: 10px 20px;
+                cursor: pointer;
+                border: none;
+                background-color: #4CAF50;
+                color: white;
+                border-radius: 5px;
+            }
+
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5">
+
+
+
+        <h1>🚗 Welcome to Tesla ⚡</h1>
+        <p>Get ready to experience the future of driving! At Tesla, we’re not just making cars — we’re creating a movement. From innovative electric vehicles to cutting-edge technology, our mission is to accelerate the world’s transition to sustainable energy. Buckle up, your journey towards a cleaner, smarter, and faster future begins now. 🌍⚡
+        </p>
+        <p>Drive the change. Drive Tesla. 🌟</p>
+        
+        <!-- Tesla Reviews Section -->
+        <div class="reviews-container">
+            {% for r in reviews %}
+            <div class="review-card">
+                <h5>Review</h5>
+                <p>{{ r[0]}}</p>
+                <div class="author">Anonymous reviewer</div> <!-- Optional: Add dynamic author if available -->
+                <div class="rating">⭐⭐⭐⭐⭐</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Review Form -->
+        <div class="form-container">
+            <h3>Give Your Review</h3>
+            <form id="reviewForm">
+                <!-- Phone Number or Email Field -->
+                <div class="input-container" action="/submit_review" method="POST">
+                    <input type="text" id="contact" placeholder="Enter your phone number or email" required>
+                    <button type="button" class="otp-button" id="sendOTPButton">Send OTP</button>
+                </div>
+                <div id="contactError" class="error-message"></div>
+
+                <!-- OTP Field -->
+                <input type="text" id="otp" placeholder="Enter OTP" required>
+                <div id="otpError" class="error-message"></div>
+
+                <!-- Review Text Area -->
+                <textarea id="reviewText" rows="4" placeholder="Enter your review" required></textarea>
+                <div id="reviewError" class="error-message"></div>
+
+                <!-- Submit Button -->
+                <button type="submit">Submit Review</button>
+            </form>
+        </div>
+
+        <!-- Floating Switch Button -->
+        <label class="switch">
+            <input type="checkbox" id="loginSwitch">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <script>
+        // Simulate OTP generation and sending (for demonstration purposes)
+        let simulatedOTP = "123456";  // Simulated OTP for demo purposes
+        let contactType = ""; // To track if the input is a phone number or email
+
+        // Handle OTP sending
+        document.getElementById("sendOTPButton").addEventListener("click", function() {
+            let contact = document.getElementById("contact").value;
+            let contactError = document.getElementById("contactError");
+
+            // Reset error messages
+            contactError.textContent = "";
+
+            // Validate contact (either phone number or email)
+            let phonePattern = /^[0-9]{10}$/;
+            let emailPattern = /^[a-zA-Z0-9._-]+@[a-zAZ0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+            if (phonePattern.test(contact)) {
+                contactType = "phone";
+                alert("OTP sent to your phone number: " + contact); // Simulate sending OTP
+            } else if (emailPattern.test(contact)) {
+                contactType = "email";
+                alert("OTP sent to your email: " + contact); // Simulate sending OTP
+            } else {
+                contactError.textContent = "Please enter a valid phone number or email.";
+                return;
+            }
+        });
+
+        // Form validation and submission
+        document.getElementById("reviewForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            let contact = document.getElementById("contact").value;
+            let otp = document.getElementById("otp").value;
+            let reviewText = document.getElementById("reviewText").value;
+            let contactError = document.getElementById("contactError");
+            let otpError = document.getElementById("otpError");
+            let reviewError = document.getElementById("reviewError");
+
+            // Reset error messages
+            contactError.textContent = "";
+            otpError.textContent = "";
+            reviewError.textContent = "";
+
+            // Validate OTP
+            if (otp !== simulatedOTP) {
+                otpError.textContent = "Incorrect OTP.";
+                return;
+            }
+
+            // Validate review text
+            if (reviewText.trim() === "") {
+                reviewError.textContent = "Please enter a review.";
+                return;
+            }
+
+
+            // Prepare data to send
+            let formData = new FormData();
+            formData.append("contact", contact);
+            formData.append("reviewText", reviewText);
+
+            try {
+                let response = await fetch("/submit_review", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert("Review submitted successfully!");
+                    document.getElementById("reviewForm").reset();
+                } else {
+                    alert("Failed to submit review.");
+                }
+            } catch (error) {
+                console.error("Error submitting review:", error);
+                alert("An error occurred while submitting the review.");
+            }
+
+            // Reset form
+            document.getElementById("reviewForm").reset();
+        });
+
+        document.getElementById('loginSwitch').addEventListener('change', function() {
+            if (this.checked) {
+                // Redirect to login page
+                window.location.href = "{{ url_for('login') }}";  // Change the URL to your actual login page URL
+            } else {
+                // Optional: Add behavior if needed when the switch is turned off.
+            }
+        });
+
+    </script>
+</body>
+</html>
