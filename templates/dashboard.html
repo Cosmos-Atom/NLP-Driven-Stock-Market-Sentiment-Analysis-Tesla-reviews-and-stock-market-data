@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  <!-- Include Chart.js -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- Include jQuery -->
+
+    <!-- Add some styles -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        #showDataButton {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1rem;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #showDataButton:hover {
+            background-color: #45a049;
+        }
+
+        #stockChart {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 30px;
+            background-color: white;
+        }
+
+        .container {
+            text-align: center;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+        }
+
+        .description {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        <p class="description">Click the button below to view the stock data chart.</p>
+
+        <!-- Button to show stock data -->
+        <button id="showDataButton">Show Stock Data</button>
+
+        <!-- Line Chart (hidden initially) -->
+        <canvas id="stockChart" width="400" height="200" style="display: none;"></canvas>
+    </div>
+
+    <script>
+        // When the "Show Stock Data" button is clicked
+        $('#showDataButton').click(function() {
+            // Fetch data from Flask using AJAX
+            $.getJSON('/get_stock_data', function(data) {
+                const js_dates = data.dates;  // Get dates from the Flask JSON response
+                const js_stocks = data.stocks;  // Get stock values from the Flask JSON response
+
+                // Log the data to ensure it's fetched correctly
+                console.log("Dates: ", js_dates);
+                console.log("Stocks: ", js_stocks);
+
+                // Show the chart after the button click
+                $('#stockChart').show();  // Make the chart visible
+                $('#showDataButton').hide();  // Hide the button
+
+                // Create the chart
+                const ctx = document.getElementById('stockChart').getContext('2d');
+                const stockChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: js_dates,  // X-axis (dates)
+                        datasets: [{
+                            label: 'Stock Price',
+                            data: js_stocks,  // Y-axis (stock values)
+                            borderColor: 'rgba(75, 192, 192, 1)',  // Line color
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',  // Point background color
+                            fill: false,  // No fill under the line
+                            pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',  // Hover color for dots
+                            pointHoverRadius: 6,  // Hover dot size
+                            tension: 0  // Set tension to 0 for straight lines
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(tooltipItem) {
+                                        // Format tooltip to show both stock and date values
+                                        return 'Date: ' + tooltipItem.label + ', Stock: ' + tooltipItem.raw;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                },
+                                grid: {
+                                    color: '#f2f2f2'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Stock Price'
+                                },
+                                beginAtZero: false,  // Don't force Y-axis to start from zero
+                                grid: {
+                                    color: '#f2f2f2'
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

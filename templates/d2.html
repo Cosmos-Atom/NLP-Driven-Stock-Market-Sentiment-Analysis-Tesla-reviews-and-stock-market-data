@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #bb86fc;
+            font-size: 2.5rem;
+        }
+
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .chart {
+            flex: 1;
+            min-width: 45%;
+            background-color: #1f1f1f;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+        }
+
+        canvas {
+            max-height: 400px;
+        }
+
+        .chart-title {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #03dac6;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <div class="chart-container">
+        <div class="chart">
+            <div class="chart-title">Stock Market Prices</div>
+            <canvas id="stockChart"></canvas>
+        </div>
+        <div class="chart">
+            <div class="chart-title">Average Sentiment Scores</div>
+            <canvas id="sentimentChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $.getJSON('/get_data', function (data) {
+                const stockData = data.stock_data;
+                const sentimentData = data.sentiment_data;
+
+                const stockCtx = document.getElementById('stockChart').getContext('2d');
+                new Chart(stockCtx, {
+                    type: 'line',
+                    data: {
+                        labels: stockData.dates,
+                        datasets: [{
+                            label: 'Stock Prices',
+                            data: stockData.values,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            pointBackgroundColor: '#03dac6',
+                            pointRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: '#ffffff' } },
+                        },
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Date', color: '#ffffff' },
+                                ticks: { color: '#ffffff' }
+                            },
+                            y: { 
+                                title: { display: true, text: 'Stock Value', color: '#ffffff' },
+                                ticks: { color: '#ffffff' }
+                            }
+                        }
+                    }
+                });
+
+                const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+                new Chart(sentimentCtx, {
+                    type: 'line',
+                    data: {
+                        labels: sentimentData.dates,
+                        datasets: [{
+                            label: 'Sentiment Score',
+                            data: sentimentData.scores,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            pointBackgroundColor: '#bb86fc',
+                            pointRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: '#ffffff' } },
+                        },
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Date', color: '#ffffff' },
+                                reverse: true, 
+                                ticks: { color: '#ffffff' }
+                            },
+                            y: { 
+                                title: { display: true, text: 'Sentiment Score', color: '#ffffff' },
+                                ticks: { color: '#ffffff' }
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
